@@ -27,105 +27,88 @@ no_violations {
   empty(deny)
 }
 
-test_bucket_exists {
+has_violations {
+  not empty(deny)
+}
+
+test_org_sink_not_exists {
     input := {"data":[
         {
-            "asset_type": "storage.googleapis.com/Bucket",
-            "name": "test-bucket",
+            "asset_type": "logging.googleapis.com/LogSink",
+            "name": "test-sink",
             "resource": {
                 "data": {
-                    "name": "log-history"
+                    "name": "test-sink",
+                    "includeChildren": true
                 }
-            }
-        },
+            },
+            "ancestors": [
+                "organizations/1234567890"
+            ]
+        }
+    ]}
+
+    has_violations with input as input
+}
+
+test_organ_logsink_exists_without_destination {
+    input := {"data":[
         {
             "asset_type": "logging.googleapis.com/LogSink",
-            "name": "log-sink",
+            "name": "test-org-sink",
             "resource": {
                 "data": {
-                    "name": "log_sink"
+                    "name": "test-org-sink",
+                    "includeChildren": true
                 }
-            }
+            },
+            "ancestors": [
+                "organizations/565977066779"
+            ]
+        }
+    ]}
+
+    has_violations with input as input
+}
+
+test_organ_logsink_exists_without_logbucket {
+    input := {"data":[
+        {
+            "asset_type": "logging.googleapis.com/LogSink",
+            "name": "test-org-sink",
+            "resource": {
+                "data": {
+                    "name": "test-org-sink",
+                    "includeChildren": true,
+                    "destination": ""
+                }
+            },
+            "ancestors": [
+                "organizations/565977066779"
+            ]
+        }
+    ]}
+
+    has_violations with input as input
+}
+
+test_organ_logsink_exists_with_logbucket {
+    input := {"data":[
+        {
+            "asset_type": "logging.googleapis.com/LogSink",
+            "name": "test-org-sink",
+            "resource": {
+                "data": {
+                    "name": "test-org-sink",
+                    "includeChildren": true,
+                    "destination": "logging.googleapis.com"
+                }
+            },
+            "ancestors": [
+                "organizations/565977066779"
+            ]
         }
     ]}
 
     no_violations with input as input
-}
-
-test_bucket_not_exists {
-    input := {"data":[
-        {
-            "asset_type": "storage.googleapis.com/Bucket",
-            "name": "test-bucket",
-            "resource": {
-                "data": {
-                    "name": "log-history-does-not-exist"
-                }
-            }
-        },
-        {
-            "asset_type": "logging.googleapis.com/LogSink",
-            "name": "log-sink",
-            "resource": {
-                "data": {
-                    "name": "log_sink"
-                }
-            }
-        }
-    ]}
-
-    results := deny with input as input
-    count(results) == 1
-}
-
-test_logsink_not_exists {
-    input := {"data":[
-        {
-            "asset_type": "storage.googleapis.com/Bucket",
-            "name": "test-bucket",
-            "resource": {
-                "data": {
-                    "name": "log-history"
-                }
-            }
-        },
-        {
-            "asset_type": "logging.googleapis.com/LogSink",
-            "name": "log-sink",
-            "resource": {
-                "data": {
-                    "name": "log_sink_not_found"
-                }
-            }
-        }
-    ]}
-
-    results := deny with input as input
-    count(results) == 1
-}
-
-test_logsink_and_bucket_not_exists {
-    input := {"data":[
-        {
-            "asset_type": "storage.googleapis.com/Bucket",
-            "name": "test-bucket",
-            "resource": {
-                "data": {
-                    "name": "log-history_not_found"
-                }
-            }
-        },
-        {
-            "asset_type": "logging.googleapis.com/LogSink",
-            "name": "log-sink",
-            "resource": {
-                "data": {
-                    "name": "log_sink_not_found"
-                }
-            }
-        }
-    ]}
-
-    results := deny with input as input
-    count(results) == 2
 }
